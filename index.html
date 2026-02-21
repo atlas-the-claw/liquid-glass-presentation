@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liquid Glass Presentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-shadow: rgba(0, 0, 0, 0.4);
+  --glass-blur: 20px;
+  --text-primary: rgba(255, 255, 255, 0.95);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --accent: #6C63FF;
+  --accent-glow: rgba(108, 99, 255, 0.3);
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: #0a0a0f;
+  color: var(--text-primary);
+}
+
+/* Video backgrounds */
+.slide-video {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+.video-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(10,10,15,0.7) 0%, rgba(10,10,15,0.4) 50%, rgba(10,10,15,0.8) 100%);
+  z-index: 1;
+}
+
+/* Slides */
+.slides-container {
+  position: relative;
+  width: 100%; height: 100%;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  z-index: 2;
+  padding: clamp(20px, 4vw, 80px);
+}
+
+.slide.active {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+/* Liquid Glass */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.06);
+  padding: clamp(16px, 2vw, 32px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 30px var(--accent-glow);
+}
+
+/* Slide 1 - Cover */
+.slide-1-content {
+  text-align: center;
+}
+
+.slide-1-content .badge {
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-size: clamp(11px, 1.2vw, 14px);
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: clamp(16px, 3vh, 40px);
+  color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(108, 99, 255, 0.08);
+}
+
+.slide-1-content h1 {
+  font-size: clamp(36px, 7vw, 96px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  margin-bottom: clamp(12px, 2vh, 24px);
+  background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.slide-1-content p {
+  font-size: clamp(14px, 1.8vw, 22px);
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Slide 2 - Data */
+.slide-2-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(16px, 2vw, 32px);
+  width: 100%;
+  max-width: 1100px;
+}
+
+.data-col h2 {
+  font-size: clamp(20px, 2.5vw, 32px);
+  font-weight: 700;
+  margin-bottom: clamp(12px, 2vh, 24px);
+}
+
+.stat-item {
+  margin-bottom: clamp(12px, 1.5vh, 20px);
+}
+
+.stat-value {
+  font-size: clamp(28px, 4vw, 56px);
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1.1;
+}
+
+.stat-label {
+  font-size: clamp(12px, 1.2vw, 16px);
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.data-list {
+  list-style: none;
+}
+
+.data-list li {
+  padding: clamp(8px, 1vh, 14px) 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: clamp(13px, 1.4vw, 17px);
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-secondary);
+}
+
+.data-list li span:last-child {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Slide 3 - Grid */
+.slide-3-content {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: clamp(12px, 1.5vw, 24px);
+  width: 100%;
+  max-width: 1100px;
+}
+
+.grid-icon {
+  font-size: clamp(24px, 3vw, 40px);
+  margin-bottom: 12px;
+}
+
+.grid-title {
+  font-size: clamp(14px, 1.5vw, 20px);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.grid-desc {
+  font-size: clamp(11px, 1.1vw, 14px);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Slide 4 - Quote */
+.slide-4-content {
+  text-align: center;
+  max-width: 900px;
+  padding: clamp(30px, 5vw, 80px);
+}
+
+.quote-mark {
+  font-size: clamp(48px, 8vw, 120px);
+  color: var(--accent);
+  line-height: 0.6;
+  opacity: 0.4;
+}
+
+.quote-text {
+  font-size: clamp(20px, 3.5vw, 44px);
+  font-weight: 300;
+  line-height: 1.4;
+  margin: clamp(16px, 3vh, 40px) 0;
+  font-style: italic;
+}
+
+.quote-author {
+  font-size: clamp(13px, 1.4vw, 18px);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Slide 5 - Contact */
+.slide-5-content {
+  text-align: center;
+  max-width: 700px;
+}
+
+.slide-5-content h2 {
+  font-size: clamp(28px, 4vw, 52px);
+  font-weight: 800;
+  margin-bottom: clamp(20px, 4vh, 48px);
+}
+
+.contact-list {
+  list-style: none;
+  text-align: left;
+}
+
+.contact-list li {
+  padding: clamp(14px, 2vh, 22px) clamp(16px, 2vw, 28px);
+  margin-bottom: 12px;
+  font-size: clamp(14px, 1.6vw, 20px);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.contact-icon {
+  font-size: clamp(20px, 2.5vw, 30px);
+  width: 40px;
+  text-align: center;
+}
+
+.contact-label {
+  color: var(--text-secondary);
+  font-size: clamp(11px, 1vw, 13px);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.contact-value {
+  font-weight: 600;
+}
+
+/* Navigation */
+.nav-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 2vw, 32px);
+  padding: 20px 32px;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.nav-bar.hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+}
+
+.nav-dots {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.nav-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.nav-dot.active {
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+  transform: scale(1.3);
+}
+
+.nav-btn {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+  background: rgba(255,255,255,0.12);
+  transform: scale(1.1);
+}
+
+.slide-counter {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  min-width: 50px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Progress bar */
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), #a78bfa);
+  z-index: 101;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* Fullscreen hint */
+.fs-hint {
+  position: fixed;
+  top: 20px; right: 20px;
+  z-index: 100;
+  font-size: 12px;
+  color: var(--text-secondary);
+  opacity: 0.5;
+  transition: opacity 0.4s;
+}
+
+.nav-bar.hidden ~ .fs-hint { opacity: 0; }
+
+@media (max-width: 768px) {
+  .slide-2-content { grid-template-columns: 1fr; }
+  .slide-3-content { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .slide-3-content { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="slides-container">
+  <!-- Slide 1 - Cover -->
+  <div class="slide active" id="slide-0">
+    <video class="slide-video" muted loop playsinline id="video-0"></video>
+    <div class="video-overlay"></div>
+    <div class="slide-1-content" style="z-index:3;position:relative;">
+      <div class="badge glass">Presentation 2026</div>
+      <h1>Liquid Glass<br>Experience</h1>
+      <p>An immersive full-screen presentation with glassmorphism, HLS video backgrounds, and fluid transitions.</p>
+    </div>
+  </div>
+
+  <!-- Slide 2 - Data -->
+  <div class="slide" id="slide-1">
+    <video class="slide-video" muted loop playsinline id="video-1"></video>
+    <div class="video-overlay"></div>
+    <div class="slide-2-content" style="z-index:3;position:relative;">
+      <div class="data-col glass-card">
+        <h2>Key Metrics</h2>
+        <div class="stat-item"><div class="stat-value">98%</div><div class="stat-label">User Satisfaction</div></div>
+        <div class="stat-item"><div class="stat-value">2.4M</div><div class="stat-label">Active Users</div></div>
+        <div class="stat-item"><div class="stat-value">150ms</div><div class="stat-label">Avg Response Time</div></div>
+      </div>
+      <div class="data-col glass-card">
+        <h2>Performance</h2>
+        <ul class="data-list">
+          <li><span>Uptime</span><span>99.97%</span></li>
+          <li><span>Latency P95</span><span>42ms</span></li>
+          <li><span>Throughput</span><span>12K rps</span></li>
+          <li><span>Error Rate</span><span>0.02%</span></li>
+          <li><span>Cache Hit</span><span>94.3%</span></li>
+          <li><span>Deploy Freq</span><span>8x/day</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 3 - Grid -->
+  <div class="slide" id="slide-2">
+    <video class="slide-video" muted loop playsinline id="video-2"></video>
+    <div class="video-overlay"></div>
+    <div class="slide-3-content" style="z-index:3;position:relative;">
+      <div class="glass-card"><div class="grid-icon">⚡</div><div class="grid-title">Lightning Fast</div><div class="grid-desc">Sub-100ms rendering with edge computing and smart caching strategies.</div></div>
+      <div class="glass-card"><div class="grid-icon">🔒</div><div class="grid-title">Secure by Default</div><div class="grid-desc">End-to-end encryption with zero-trust architecture and SOC2 compliance.</div></div>
+      <div class="glass-card"><div class="grid-icon">🧠</div><div class="grid-title">AI-Powered</div><div class="grid-desc">Intelligent automation and predictive analytics built into every layer.</div></div>
+      <div class="glass-card"><div class="grid-icon">🌍</div><div class="grid-title">Global Scale</div><div class="grid-desc">Deployed across 42 regions with automatic geo-routing and failover.</div></div>
+      <div class="glass-card"><div class="grid-icon">🎨</div><div class="grid-title">Beautiful UI</div><div class="grid-desc">Crafted with liquid glass aesthetics and micro-interactions throughout.</div></div>
+      <div class="glass-card"><div class="grid-icon">📊</div><div class="grid-title">Deep Analytics</div><div class="grid-desc">Real-time dashboards with custom metrics and anomaly detection.</div></div>
+    </div>
+  </div>
+
+  <!-- Slide 4 - Quote -->
+  <div class="slide" id="slide-3">
+    <video class="slide-video" muted loop playsinline id="video-3"></video>
+    <div class="video-overlay"></div>
+    <div class="slide-4-content glass" style="z-index:3;position:relative;">
+      <div class="quote-mark">"</div>
+      <div class="quote-text">The best interface is one that disappears, leaving only the experience behind.</div>
+      <div class="quote-author">— Design Philosophy</div>
+    </div>
+  </div>
+
+  <!-- Slide 5 - Contact -->
+  <div class="slide" id="slide-4">
+    <video class="slide-video" muted loop playsinline id="video-4"></video>
+    <div class="video-overlay"></div>
+    <div class="slide-5-content" style="z-index:3;position:relative;">
+      <h2>Get in Touch</h2>
+      <ul class="contact-list">
+        <li class="glass-card"><span class="contact-icon">✉️</span><div><div class="contact-label">Email</div><div class="contact-value">hello@liquidglass.dev</div></div></li>
+        <li class="glass-card"><span class="contact-icon">🌐</span><div><div class="contact-label">Website</div><div class="contact-value">liquidglass.dev</div></div></li>
+        <li class="glass-card"><span class="contact-icon">📍</span><div><div class="contact-label">Location</div><div class="contact-value">São Paulo, Brasil</div></div></li>
+        <li class="glass-card"><span class="contact-icon">💬</span><div><div class="contact-label">Social</div><div class="contact-value">@liquidglass</div></div></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Navigation -->
+<div class="nav-bar glass" id="navBar">
+  <button class="nav-btn" id="prevBtn" aria-label="Previous">◀</button>
+  <div class="nav-dots" id="navDots"></div>
+  <div class="slide-counter" id="slideCounter">1 / 5</div>
+  <button class="nav-btn" id="nextBtn" aria-label="Next">▶</button>
+  <button class="nav-btn" id="fsBtn" aria-label="Fullscreen">⛶</button>
+</div>
+
+<div class="fs-hint">Press F for fullscreen</div>
+
+<script>
+const TOTAL = 5;
+let current = 0;
+let hideTimeout;
+
+// HLS video sources (free public streams)
+const videoSources = [
+  'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+  'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+  'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+  'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+  'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+];
+
+// Init HLS
+videoSources.forEach((src, i) => {
+  const video = document.getElementById(`video-${i}`);
+  if (!video) return;
+  if (Hls.isSupported()) {
+    const hls = new Hls({ autoStartLoad: true });
+    hls.loadSource(src);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => { if (i === 0) video.play().catch(() => {}); });
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = src;
+    if (i === 0) video.play().catch(() => {});
+  }
+});
+
+// Build nav dots
+const dotsEl = document.getElementById('navDots');
+for (let i = 0; i < TOTAL; i++) {
+  const dot = document.createElement('button');
+  dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+  dot.addEventListener('click', () => goTo(i));
+  dotsEl.appendChild(dot);
+}
+
+function goTo(n) {
+  if (n < 0 || n >= TOTAL || n === current) return;
+  document.getElementById(`slide-${current}`).classList.remove('active');
+  const oldVideo = document.getElementById(`video-${current}`);
+  if (oldVideo) oldVideo.pause();
+
+  current = n;
+
+  document.getElementById(`slide-${current}`).classList.add('active');
+  const newVideo = document.getElementById(`video-${current}`);
+  if (newVideo) newVideo.play().catch(() => {});
+
+  // Update dots
+  document.querySelectorAll('.nav-dot').forEach((d, i) => d.classList.toggle('active', i === current));
+  document.getElementById('slideCounter').textContent = `${current + 1} / ${TOTAL}`;
+  document.getElementById('progressBar').style.width = `${((current + 1) / TOTAL) * 100}%`;
+}
+
+document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+// Keyboard
+document.addEventListener('keydown', (e) => {
+  switch (e.key) {
+    case 'ArrowRight': case 'ArrowDown': case ' ': case 'Enter':
+      e.preventDefault(); goTo(current + 1); break;
+    case 'ArrowLeft': case 'ArrowUp':
+      e.preventDefault(); goTo(current - 1); break;
+    case 'f': case 'F':
+      toggleFullscreen(); break;
+    case 'Escape':
+      if (document.fullscreenElement) document.exitFullscreen(); break;
+  }
+});
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+  else document.exitFullscreen();
+}
+document.getElementById('fsBtn').addEventListener('click', toggleFullscreen);
+
+// Auto-hide nav
+const navBar = document.getElementById('navBar');
+function showNav() {
+  navBar.classList.remove('hidden');
+  clearTimeout(hideTimeout);
+  hideTimeout = setTimeout(() => navBar.classList.add('hidden'), 3000);
+}
+document.addEventListener('mousemove', showNav);
+document.addEventListener('touchstart', showNav);
+showNav();
+
+// Init progress
+document.getElementById('progressBar').style.width = `${(1 / TOTAL) * 100}%`;
+</script>
+</body>
+</html>
